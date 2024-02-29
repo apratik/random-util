@@ -4,14 +4,15 @@ function rename(obj, mapping) {
         const current = _.get(obj, fromPath.join('.'));
         
         if (_.isArray(current)) {
-            _.each(current, (value, index) => {
+            const arrayValues = current.map((value, index) => {
                 const toPath = to.replace('[x]', `[${index}]`);
                 if (_.isObject(value)) {
                     rename(value, _.mapKeys(mapping, (value, key) => key.replace(fromPath.join('.'), toPath)));
                 } else {
-                    _.set(obj, toPath, value);
+                    return value;
                 }
             });
+            _.set(obj, to, arrayValues);
             _.unset(obj, fromPath.join('.'));
         } else if (_.isObject(current)) {
             _.each(current, (value, key) => {

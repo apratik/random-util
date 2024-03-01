@@ -1,29 +1,10 @@
+const jp = require('jsonpath-plus');
+
 function rename(obj, mapping) {
-    _.each(mapping, (to, from) => {
-        const fromPath = from.split('.');
-        const current = _.get(obj, fromPath.join('.'));
-        
-        if (_.isArray(current)) {
-            const arrayValues = current.map((value, index) => {
-                const toPath = to.replace('[x]', `[${index}]`);
-                if (_.isObject(value)) {
-                    rename(value, _.mapKeys(mapping, (value, key) => key.replace(fromPath.join('.'), toPath)));
-                } else {
-                    return value;
-                }
-            });
-            _.set(obj, to.substring(0, to.lastIndexOf('[x]')), arrayValues);
-            _.unset(obj, fromPath.join('.'));
-        } else if (_.isObject(current)) {
-            _.each(current, (value, key) => {
-                const toPath = to.replace('[x]', `[${key}]`);
-                _.set(obj, toPath, value);
-            });
-            _.unset(obj, fromPath.join('.'));
-        } else {
-            _.set(obj, to, current);
-            _.unset(obj, fromPath.join('.'));
-        }
+    Object.entries(mapping).forEach(([from, to]) => {
+        const value = jp.value(obj, from);
+        jp.value(obj, to, value);
+        jp.apply(obj, `$..${from}`, () => jp.value(obj, to));
     });
     return obj;
 }

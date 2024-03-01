@@ -1,0 +1,21 @@
+// config.js
+
+module.exports = [
+    {
+        func: "shiftdown",
+        args: ["payments"],
+        then: {
+            func: "rename",
+            mappings: [
+                {
+                    originalFrom: "payments.debtor.partyIdentifiers.organizationId.id",
+                    to: "debtor.partyDetails.organizationIds[0].organizationId"
+                },
+                {
+                    originalFrom: "payments.debtor.partyIdentifiers.organizationId.bic",
+                    to: "debtor.partyDetails.organizationIds[0].bic"
+                }
+            ]
+        }
+    }
+];

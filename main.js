@@ -1,6 +1,6 @@
 // main.js
 
-const xform = require("./transformation");
+const rename = require("./transformation");
 
 let payload = {
     payments: {
@@ -23,7 +23,7 @@ const mappings = {
 
 };
 
-const transformedPayload = xform(payload, mappings);
+const transformedPayload = rename(payload, mappings);
 
 console.log(JSON.stringify(transformedPayload, null, 2));
 

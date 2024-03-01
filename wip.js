@@ -4,18 +4,14 @@ function rename(obj, mapping) {
         const current = _.get(obj, fromPath.join('.'));
         
         if (_.isArray(current)) {
-            const arrayValues = current.map((value, index) => {
-                const toPath = to.replace('[x]', `[${index}]`);
+            current.forEach((value, index) => {
+                const toPath = to.replace(/\[x\]/g, `[${index}]`);
                 if (_.isObject(value)) {
                     rename(value, _.mapKeys(mapping, (value, key) => key.replace(fromPath.join('.'), toPath)));
                 } else {
-                    return value;
+                    _.set(obj, toPath, value);
                 }
             });
-            if (!_.get(obj, to)) {
-                _.set(obj, to, []);
-            }
-            _.get(obj, to).push(...arrayValues.filter(value => value !== undefined));
             _.unset(obj, fromPath.join('.'));
         } else if (_.isObject(current)) {
             _.each(current, (value, key) => {

@@ -1,21 +1,19 @@
 // config.js
 
-module.exports = [
-    {
-        func: "shiftdown",
-        args: ["payments"],
-        then: {
-            func: "rename",
-            mappings: [
-                {
-                    originalFrom: "payments.debtor.partyIdentifiers.organizationId.id",
-                    to: "debtor.partyDetails.organizationIds[0].organizationId"
-                },
-                {
-                    originalFrom: "payments.debtor.partyIdentifiers.organizationId.bic",
-                    to: "debtor.partyDetails.organizationIds[0].bic"
+module.exports = {
+    upgrade: function(payload) {
+        return [
+            {
+                func: "rename",
+                mappings: {
+                    "from_path": "to_path",
+                    "from_path2": "to_path2"
                 }
-            ]
-        }
+            },
+            {
+                func: "shiftdown",
+                args: ["payments"]
+            }
+        ];
     }
-];
+};

@@ -12,7 +12,10 @@ function rename(obj, mapping) {
                     return value;
                 }
             });
-            _.set(obj, to, arrayValues);
+            if (!_.get(obj, to)) {
+                _.set(obj, to, []);
+            }
+            _.get(obj, to).push(...arrayValues.filter(value => value !== undefined));
             _.unset(obj, fromPath.join('.'));
         } else if (_.isObject(current)) {
             _.each(current, (value, key) => {

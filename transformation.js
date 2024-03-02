@@ -1,49 +1,45 @@
-// transformation.js
+const _ = require("lodash");
 
-const _ = require('lodash');
-
-function rename(payload, mappings) {
-    const transformedPayload = {};
-
-    for (const fromPath in mappings) {
-        if (mappings.hasOwnProperty(fromPath)) {
-            const toPath = mappings[fromPath];
-            const value = _.get(payload, fromPath);
-
-            // Extract the organizationId index from the "to" path if it exists
-            const indexMatch = toPath.match(/\[(\d+)\]/);
-            const index = indexMatch ? parseInt(indexMatch[1]) : 0;
-
-            // Extract the parent path for organizationIds from the "to" path
-            const parentPath = toPath.substring(0, toPath.indexOf('['));
-
-            // Ensure the parent path exists in the transformed payload
-            if (!_.has(transformedPayload, parentPath)) {
-                // Initialize as an empty array if it doesn't exist
-                _.set(transformedPayload, parentPath, []);
-            }
-
-            // Ensure the parent path is an array
-            if (!Array.isArray(_.get(transformedPayload, parentPath))) {
-                // If not an array, set it as an empty array
-                _.set(transformedPayload, parentPath, []);
-            }
-
-            // Ensure the organizationId object exists at the specified index
-            while (_.get(transformedPayload, `${parentPath}.length`, 0) <= index) {
-                // Push empty objects until the array is long enough
-                _.get(transformedPayload, parentPath).push({});
-            }
-
-            // Extract the field name from the "to" path
-            const fieldName = toPath.split('.').pop();
-
-            // Set the value at the specified index for the dynamically extracted field name
-            _.set(transformedPayload, `${parentPath}[${index}].${fieldName}`, value);
+function rename(obj, mapping) {
+    _.each(mapping, (to, from) => {
+        if (to.startsWith(from)) {
+            const current = _.get(obj, from);
+            _.unset(obj, from);
+            _.set(obj, to, current);
+            return;
         }
-    }
-
-    return transformedPayload;
+        _.set(obj, to, _.get(obj, from));
+        _.unset(obj, from);
+    });
+    return obj;
 }
 
-module.exports = rename;
+function shiftUp(obj, parentName) {
+    _.forOwn(obj, (value, key) => {
+        if (key === parentName) {
+            const parent = obj[key];
+            delete obj[key];
+            obj[parentName + "_1"] = parent;
+            return false; // Stop iteration
+        } else if (_.isObject(value)) {
+            shiftUp(value, parentName);
+        }
+    });
+}
+
+function shiftDown(obj, parentName) {
+    let found = false;
+    _.forOwn(obj, (value, key) => {
+        if (found) return false; // Stop iteration if parent has been found
+        if (key === parentName) {
+            const parent = obj[key];
+            delete obj[key];
+            obj[parentName + "_1"] = parent;
+            found = true;
+        } else if (_.isObject(value)) {
+            shiftDown(value, parentName);
+        }
+    });
+}
+
+module.exports = { rename, shiftUp, shiftDown };

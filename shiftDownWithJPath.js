@@ -2,11 +2,11 @@ const _ = require("lodash");
 
 function shiftDown(obj, jsonPath) {
     const keys = jsonPath.split('.');
-    const lastKey = keys.pop(); // Remove the last key
     let currentObj = obj;
 
     // Traverse the object until reaching the parent of the specified path
-    for (const key of keys) {
+    for (let i = 0; i < keys.length - 1; i++) {
+        const key = keys[i];
         if (_.isObject(currentObj[key])) {
             currentObj = currentObj[key];
         } else {
@@ -15,12 +15,17 @@ function shiftDown(obj, jsonPath) {
         }
     }
 
+    // Get the key for the last element in the path
+    const lastKey = keys[keys.length - 1];
+
     // Check if the last key exists in the current object
     if (_.has(currentObj, lastKey)) {
-        // Move the specified property to the root level
+        // Move the specified property to the parent's level
         const value = _.get(currentObj, lastKey);
-        _.set(obj, `debtor.partyIdentifiers.${lastKey}`, value); // Set the property at the desired location
-        delete currentObj[lastKey]; // Delete the property from its previous location
+        delete currentObj[lastKey]; // Delete the property at its original location
+
+        // Set the property at the desired location
+        _.set(obj, `debtor.partyIdentifiers.${lastKey}`, value);
     } else {
         console.log("JSON path not found in the object.");
     }

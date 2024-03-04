@@ -1,28 +1,45 @@
-const { rename, unset, move } = require('./funcs');
+const _ = require('lodash');
+
+function rename(obj, mapping) {
+    _.each(mapping, (to, from) => {
+        if (to.startsWith(from)) {
+            const current = _.get(obj, from);
+            _.unset(obj, from);
+            _.set(obj, to, current);
+        } else {
+            _.set(obj, to, _.get(obj, from));
+        }
+        _.unset(obj, from);
+    });
+    return obj;
+}
+
+function unset(obj, removedItems) {
+    _.each(removedItems, (fieldId) => {
+        _.unset(obj, fieldId);
+    });
+    return obj;
+}
+
+function move(obj, mapping) {
+    if (typeof mapping === 'object') {
+        _.each(mapping, (toPath, fromPath) => {
+            const value = _.get(obj, fromPath);
+            _.set(obj, toPath, value);
+            _.unset(obj, fromPath);
+        });
+    } else if (typeof mapping === 'string') {
+        const toPath = Object.keys(mapping)[0];
+        const fromPath = mapping[toPath];
+        const value = _.get(obj, fromPath);
+        _.set(obj, toPath, value);
+        _.unset(obj, fromPath);
+    }
+    return obj;
+}
 
 module.exports = {
-    upgrade(payload) {
-        rename(payload, {
-            "user.name.first": "user.first_name",
-            "user.name.last": "user.last_name"
-        });
-
-        unset(payload, ["user.dob", "user.city"]);
-
-        move(payload, {
-            "user.name": "customer.personal_info.name"
-        });
-
-        return payload;
-    },
-
-    downgrade(payload) {
-        unset(payload, ["user.dob", "user.city"]);
-
-        move(payload, {
-            "customer.personal_info.name": "user.name"
-        });
-
-        return payload;
-    }
+    rename,
+    unset,
+    move
 };

@@ -1,87 +1,22 @@
-// dsl.js
-
-const _ = require("lodash");
-
-function shiftup(payload, from, to) {
-    const value = _.get(payload, from);
-    _.unset(payload, from);
-    _.set(payload, to, { ...value });
-    return payload;
-}
-
-function shiftdown(payload, levelToRemove) {
-    const value = _.get(payload, levelToRemove);
-    _.unset(payload, levelToRemove);
-    _.merge(payload, value); // Merge the contents of the removed level into the payload
-    return payload;
-}
-
-function rename(payload, mappings) {
-    Object.entries(mappings).forEach(([from, to]) => {
-        const value = _.get(payload, from);
-        _.unset(payload, from);
-        _.set(payload, to, value);
-    });
-    return payload;
-}
-
-function unset(payload, fields) {
-    fields.forEach(field => {
-        _.unset(payload, field);
-    });
-    return payload;
-}
+const { rename, unset, move } = require('./funcs');
 
 module.exports = {
-    shiftup,
-    shiftdown,
-    rename,
-    unset
-};
+    upgrade: function(payload) {
+        rename(payload, {
+            "user.name.first": "user.first_name",
+            "user.name.last": "user.last_name"
+        });
 
+        unset(payload, ["user.dob", "user.city"]);
 
+        // Perform the move operation here
+        move("user.name", "customer.personal_info.name", payload);
+    },
 
+    downgrade: function(payload) {
+        unset(payload, ["user.dob", "user.city"]);
 
-----
-
-
-    // dsl.js
-
-const _ = require("lodash");
-
-function shiftup(payload, from, to) {
-    const value = _.get(payload, from);
-    _.unset(payload, from);
-    _.set(payload, to, { ...value });
-    return payload;
-}
-
-function shiftdown(payload, levelToRemove) {
-    const value = _.get(payload, levelToRemove);
-    _.unset(payload, levelToRemove);
-    _.merge(payload, value); // Merge the contents of the removed level into the payload
-    return payload;
-}
-
-function rename(payload, mappings) {
-    Object.entries(mappings).forEach(([from, to]) => {
-        const value = _.get(payload, from);
-        _.unset(payload, from);
-        _.set(payload, to, value);
-    });
-    return payload;
-}
-
-function unset(payload, fields) {
-    fields.forEach(field => {
-        _.unset(payload, field);
-    });
-    return payload;
-}
-
-module.exports = {
-    shiftup,
-    shiftdown,
-    rename,
-    unset
+        // Perform the move operation here
+        move("customer.personal_info.name", "user.name", payload);
+    }
 };

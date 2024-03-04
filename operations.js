@@ -29,10 +29,14 @@ function unset(obj, removedItems) {
     return obj;
 }
 
-function move(fromPath, toPath, obj) {
-    const value = _.get(obj, fromPath);
-    _.set(obj, toPath, value);
-    _.unset(obj, fromPath);
+function move(obj, mappings) {
+    mappings.forEach(mapping => {
+        const fromPath = Object.keys(mapping)[0];
+        const toPath = mapping[fromPath];
+        const value = _.get(obj, fromPath);
+        _.set(obj, toPath, value);
+        _.unset(obj, fromPath);
+    });
     return obj;
 }
 

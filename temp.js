@@ -125,37 +125,27 @@ function modifyAddress(payload, parentPaths, operations) {
 
 -----
 
-const jsonpath = require('jsonpath');
-
 function move(payload, mappings) {
     mappings.forEach(mapping => {
         const fromPath = Object.keys(mapping)[0];
         const toPath = mapping[fromPath];
-        
-        const sourceObjects = jsonpath.query(payload, `$${fromPath}`);
-        console.log('Source objects:', sourceObjects);
-        
-        // Add the source objects to the destination
-        jsonpath.apply(payload, `$${toPath}`, (destinationObjects) => {
-            destinationObjects.push(...sourceObjects);
-            console.log('Destination objects after adding:', destinationObjects);
-            return destinationObjects;
+
+        const sourceValues = jsonpath.query(payload, `$.${fromPath}`);
+
+        if (!sourceValues || !sourceValues.length) return; // Skip if source values are empty or undefined
+
+        // Dynamically create paths based on the mappings
+        sourceValues.forEach((value, index) => {
+            const dynamicToPath = `${toPath.replace('[*]', `[${index}]`)}`;
+            jsonpath.value(payload, `$.${dynamicToPath}`, value);
         });
-        
-        // Remove the source objects from the payload
-        jsonpath.apply(payload, `$${fromPath}`, (obj) => {
-            // Remove the object from the array
-            const filteredObjects = obj.filter(item => !sourceObjects.includes(item));
-            console.log('Payload after removal:', filteredObjects);
-            return filteredObjects;
-        });
+
+        // Remove the source path
+        jsonpath.value(payload, `$.${fromPath}`, undefined);
     });
+
     return payload;
 }
-
-module.exports = {
-    move,
-};
 
 
 -----

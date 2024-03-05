@@ -18,10 +18,10 @@ module.exports = {
                 "city": "cityName"
             },
             move: {
-                "postalCode": "postalAddress.postalCode"
+                "city": "payments.creditor.address.cityName",
+                "postalCode": "payments.postalAddress.postalCode"
             },
-            unset: ["country"],
-            targetParent: "payments"
+            unset: ["country"]
         });
     },
 

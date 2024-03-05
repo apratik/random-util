@@ -61,11 +61,9 @@ function convertToMinor(obj, currencyType, paths) {
 function modifyAddress(payload, parentPaths, operations) {
     parentPaths.forEach(parentPath => {
         const parentObjects = _.get(payload, parentPath);
-
-        // Handle nested arrays
         if (Array.isArray(parentObjects)) {
-            parentObjects.forEach(parentObj => {
-                performOperations(parentObj, operations);
+            parentObjects.forEach(parentObject => {
+                performOperations(parentObject, operations);
             });
         } else {
             performOperations(parentObjects, operations);
@@ -77,13 +75,14 @@ function performOperations(obj, operations) {
     if (operations.rename) {
         rename(obj, operations.rename);
     }
-    if (operations.move) {
-        move(obj, operations.move);
-    }
     if (operations.unset) {
         unset(obj, operations.unset);
     }
+    if (operations.move) {
+        move(obj, operations.move);
+    }
 }
+
 
 module.exports = {
     rename,

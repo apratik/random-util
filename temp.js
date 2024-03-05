@@ -58,12 +58,29 @@ function convertToMinor(obj, currencyType, paths) {
 function modifyAddress(payload, parentPaths, operations) {
     parentPaths.forEach(parentPath => {
         const parentObjects = _.get(payload, parentPath);
-        if (Array.isArray(parentObjects)) {
-            // If parentObjects is an array, iterate over each element
-            parentObjects.forEach(parentObject => {
+        if (parentObjects) { // Check if parentObjects is not null or undefined
+            if (Array.isArray(parentObjects)) {
+                // If parentObjects is an array, iterate over each element
+                parentObjects.forEach(parentObject => {
+                    // Check if parentObject is not null or undefined
+                    if (parentObject) {
+                        // Iterate over each property of the parentObject
+                        Object.keys(parentObject).forEach(property => {
+                            const propertyValue = parentObject[property];
+                            if (Array.isArray(propertyValue)) {
+                                // If the property value is an array, iterate over each element
+                                propertyValue.forEach(element => {
+                                    performOperations(element, operations);
+                                });
+                            }
+                        });
+                    }
+                });
+            } else {
+                // If parentObjects is not an array
                 // Iterate over each property of the parentObject
-                Object.keys(parentObject).forEach(property => {
-                    const propertyValue = parentObject[property];
+                Object.keys(parentObjects).forEach(property => {
+                    const propertyValue = parentObjects[property];
                     if (Array.isArray(propertyValue)) {
                         // If the property value is an array, iterate over each element
                         propertyValue.forEach(element => {
@@ -71,22 +88,11 @@ function modifyAddress(payload, parentPaths, operations) {
                         });
                     }
                 });
-            });
-        } else {
-            // If parentObjects is not an array
-            // Iterate over each property of the parentObject
-            Object.keys(parentObjects).forEach(property => {
-                const propertyValue = parentObjects[property];
-                if (Array.isArray(propertyValue)) {
-                    // If the property value is an array, iterate over each element
-                    propertyValue.forEach(element => {
-                        performOperations(element, operations);
-                    });
-                }
-            });
+            }
         }
     });
 }
+
 
 function performOperations(obj, operations) {
     if (operations.rename) {

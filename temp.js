@@ -125,17 +125,21 @@ function modifyAddress(payload, parentPaths, operations) {
 
 -----
 
+const jsonpath = require('jsonpath');
+
 function move(payload, mappings) {
     mappings.forEach(mapping => {
         const fromPath = Object.keys(mapping)[0];
         const toPath = mapping[fromPath];
         
         const sourceObjects = jsonpath.query(payload, `$${fromPath}`);
-        const destinationObjects = jsonpath.query(payload, `$${toPath}`);
         
         // Add the source objects to the destination
-        destinationObjects.push(...sourceObjects);
-        
+        jsonpath.apply(payload, `$${toPath}`, (destinationObjects) => {
+            destinationObjects.push(...sourceObjects);
+            return destinationObjects;
+        });
+
         // Remove the source objects from the payload
         jsonpath.apply(payload, `$${fromPath}`, (obj) => {
             // Remove the object from the array
@@ -144,6 +148,11 @@ function move(payload, mappings) {
     });
     return payload;
 }
+
+module.exports = {
+    move,
+};
+
 
 -----
 

@@ -56,9 +56,29 @@ function convertToMinor(obj, currencyType, paths) {
     return obj;
 }
 
+function modifyAddress(payload, parents, operationsMap) {
+    parents.forEach(parent => {
+        const operations = operationsMap[parent];
+        if (operations) {
+            if (operations.rename) {
+                rename(payload, operations.rename);
+            }
+            if (operations.unset) {
+                unset(payload, operations.unset);
+            }
+            if (operations.move) {
+                move(payload, operations.move);
+            }
+        } else {
+            console.log(`No operations defined for ${parent}`);
+        }
+    });
+}
+
 module.exports = {
     rename,
     unset,
     move,
-    convertToMinor
+    convertToMinor,
+    modifyAddress,
 };

@@ -125,15 +125,27 @@ function modifyAddress(payload, parentPaths, operations) {
 
 -----
 
+
 function move(payload, mappings) {
     mappings.forEach(mapping => {
         const fromPath = Object.keys(mapping)[0];
         const toPath = mapping[fromPath];
-        const fromValues = jp.nodes(payload, fromPath);
+        const fromValues = jsonpath.query(payload, fromPath);
         
-        fromValues.forEach(({ path, value }) => {
-            _.set(payload, toPath, value);
-            _.unset(payload, jp.stringify(path));
+        fromValues.forEach(value => {
+            const parentPath = toPath.substring(0, toPath.lastIndexOf('.'));
+            const propertyName = toPath.substring(toPath.lastIndexOf('.') + 1);
+            
+            const parentObj = jsonpath.value(payload, parentPath);
+            if (Array.isArray(parentObj[propertyName])) {
+                parentObj[propertyName].push(value);
+            } else {
+                parentObj[propertyName] = [value];
+            }
+            
+            jsonpath.apply(payload, `$${fromPath}`, (obj) => {
+                delete obj;
+            });
         });
     });
     return payload;

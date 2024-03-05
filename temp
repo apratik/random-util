@@ -58,24 +58,13 @@ function convertToMinor(obj, currencyType, paths) {
 
 function modifyAddress(payload, parentPaths, operations) {
     parentPaths.forEach(parentPath => {
-        if (parentPath.includes('[]')) {
-            // Path contains array notation
-            const parentPathParts = parentPath.split('[]');
-            const parentArray = _.get(payload, parentPathParts[0]);
-            if (Array.isArray(parentArray)) {
-                parentArray.forEach(parentObject => {
-                    const addressObject = _.get(parentObject, parentPathParts[1]);
-                    if (addressObject) {
-                        performOperations(addressObject, operations);
-                    }
-                });
-            }
-        } else {
-            // Regular parent path
-            const parentObject = _.get(payload, parentPath);
-            if (parentObject) {
+        const parentObjects = _.get(payload, parentPath);
+        if (Array.isArray(parentObjects)) {
+            parentObjects.forEach(parentObject => {
                 performOperations(parentObject, operations);
-            }
+            });
+        } else {
+            performOperations(parentObjects, operations);
         }
     });
 }

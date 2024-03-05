@@ -10,6 +10,17 @@ module.exports = {
         move(payload, {
             "user.name": "customer.personal_info.name"
         });
+
+                modifyAddress(payload, ["creditor.address", "debtor.address"], {
+            rename: {
+                "streetName": "street",
+                "buildingNumber": "building"
+            },
+            unset: ["postalCode"],
+            move: {
+                "townName": "city"
+            }
+        });
     },
 
     downgrade(payload) {

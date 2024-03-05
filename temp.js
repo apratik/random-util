@@ -106,6 +106,26 @@ function performOperations(obj, operations) {
     }
 }
 
+-----
+
+const jsonpath = require('jsonpath');
+
+function modifyAddress(payload, parentPaths, operations) {
+    parentPaths.forEach(parentPath => {
+        const parentObjects = jsonpath.query(payload, parentPath);
+        if (parentObjects && parentObjects.length > 0) {
+            parentObjects.forEach(parentObject => {
+                performOperations(parentObject, operations);
+            });
+        }
+    });
+}
+
+------
+
+    
+
+
 module.exports = {
     rename,
     unset,

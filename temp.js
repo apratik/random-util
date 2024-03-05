@@ -170,7 +170,18 @@ function removeEmptyFields(obj) {
     });
 }
 
-    
+const _ = require('lodash');
+require('lodash-deep');
+
+function removeEmptyFields(obj) {
+    return _.omitDeepBy(obj, value => {
+        return _.isEmpty(value) || _.isNull(value);
+    });
+}
+
+module.exports = {
+    removeEmptyFields,
+};
 
 
 module.exports = {

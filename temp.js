@@ -129,16 +129,12 @@ function move(payload, mappings) {
     mappings.forEach(mapping => {
         const fromPath = Object.keys(mapping)[0];
         const toPath = mapping[fromPath];
-
-        const fromValues = jp.query(payload, fromPath);
-        if (fromValues.length > 0) {
-            fromValues.forEach(value => {
-                jp.value(payload, toPath, value);
-            });
-            jp.apply(payload, fromPath, function() {
-                return undefined;
-            });
-        }
+        const fromValues = jp.nodes(payload, fromPath);
+        
+        fromValues.forEach(({ path, value }) => {
+            _.set(payload, toPath, value);
+            _.unset(payload, jp.stringify(path));
+        });
     });
     return payload;
 }

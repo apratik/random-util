@@ -125,27 +125,21 @@ function modifyAddress(payload, parentPaths, operations) {
 
 -----
 
-
 function move(payload, mappings) {
     mappings.forEach(mapping => {
         const fromPath = Object.keys(mapping)[0];
         const toPath = mapping[fromPath];
-        const fromValues = jsonpath.query(payload, fromPath);
         
-        fromValues.forEach(value => {
-            const parentPath = toPath.substring(0, toPath.lastIndexOf('.'));
-            const propertyName = toPath.substring(toPath.lastIndexOf('.') + 1);
-            
-            const parentObj = jsonpath.value(payload, parentPath);
-            if (Array.isArray(parentObj[propertyName])) {
-                parentObj[propertyName].push(value);
-            } else {
-                parentObj[propertyName] = [value];
-            }
-            
-            jsonpath.apply(payload, `$${fromPath}`, (obj) => {
-                delete obj;
-            });
+        const sourceObjects = jsonpath.query(payload, `$${fromPath}`);
+        const destinationObjects = jsonpath.query(payload, `$${toPath}`);
+        
+        // Add the source objects to the destination
+        destinationObjects.push(...sourceObjects);
+        
+        // Remove the source objects from the payload
+        jsonpath.apply(payload, `$${fromPath}`, (obj) => {
+            // Remove the object from the array
+            return obj.filter(item => !sourceObjects.includes(item));
         });
     });
     return payload;

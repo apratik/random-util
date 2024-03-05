@@ -8,6 +8,24 @@ const currencyDecimals = {
     "BHD": 3
 };
 
+const jsonQuery = require('json-query');
+
+function removeEmptyFields(obj) {
+    // Query to find empty fields
+    const query = `[* where !empty(.)]`;
+
+    // Use json-query to filter out empty fields
+    const result = jsonQuery(query, { data: obj });
+
+    // Return the result
+    return result.value;
+}
+
+module.exports = {
+    removeEmptyFields,
+};
+
+
 function rename(obj, mapping) {
     _.each(mapping, (to, from) => {
         const current = _.get(obj, from);

@@ -151,7 +151,6 @@ function move(payload, mappings) {
 -----
 
     
-const _ = require('lodash');
 
 function removeEmptyFields(obj) {
     // Base case: if obj is not an object or array, return it
@@ -165,12 +164,11 @@ function removeEmptyFields(obj) {
     }
 
     // If obj is an object, recursively call removeEmptyFields on each property
-    return _.omitBy(_.mapValues(obj, removeEmptyFields), _.isEmpty);
+    const cleanedObj = _.mapValues(obj, removeEmptyFields);
+    return _.omitBy(cleanedObj, value => {
+        return _.isObject(value) && _.isEmpty(value);
+    });
 }
-
-module.exports = {
-    removeEmptyFields,
-};
 
     
 

@@ -133,17 +133,21 @@ function move(payload, mappings) {
         const toPath = mapping[fromPath];
         
         const sourceObjects = jsonpath.query(payload, `$${fromPath}`);
+        console.log('Source objects:', sourceObjects);
         
         // Add the source objects to the destination
         jsonpath.apply(payload, `$${toPath}`, (destinationObjects) => {
             destinationObjects.push(...sourceObjects);
+            console.log('Destination objects after adding:', destinationObjects);
             return destinationObjects;
         });
-
+        
         // Remove the source objects from the payload
         jsonpath.apply(payload, `$${fromPath}`, (obj) => {
             // Remove the object from the array
-            return obj.filter(item => !sourceObjects.includes(item));
+            const filteredObjects = obj.filter(item => !sourceObjects.includes(item));
+            console.log('Payload after removal:', filteredObjects);
+            return filteredObjects;
         });
     });
     return payload;

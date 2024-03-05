@@ -1,3 +1,5 @@
+// dsl.js
+
 module.exports = {
     upgrade(payload) {
         rename(payload, {
@@ -11,15 +13,15 @@ module.exports = {
             "user.name": "customer.personal_info.name"
         });
 
-                modifyAddress(payload, ["creditor.address", "debtor.address"], {
+        modifyAddress(payload, ["creditor.address", "debtor.address"], {
             rename: {
-                "streetName": "street",
-                "buildingNumber": "building"
+                "city": "cityName"
             },
-            unset: ["postalCode"],
             move: {
-                "townName": "city"
-            }
+                "postalCode": "postalAddress.postalCode"
+            },
+            unset: ["country"],
+            targetParent: "payments"
         });
     },
 

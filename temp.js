@@ -59,19 +59,31 @@ function modifyAddress(payload, parentPaths, operations) {
     parentPaths.forEach(parentPath => {
         const parentObjects = _.get(payload, parentPath);
         if (Array.isArray(parentObjects)) {
+            // If parentObjects is an array, iterate over each element
             parentObjects.forEach(parentObject => {
-                if (parentObject && parentObject.postalAddress) {
-                    parentObject.postalAddress.forEach(address => {
-                        performOperations(address, operations);
+                // Iterate over each property of the parentObject
+                Object.keys(parentObject).forEach(property => {
+                    const propertyValue = parentObject[property];
+                    if (Array.isArray(propertyValue)) {
+                        // If the property value is an array, iterate over each element
+                        propertyValue.forEach(element => {
+                            performOperations(element, operations);
+                        });
+                    }
+                });
+            });
+        } else {
+            // If parentObjects is not an array
+            // Iterate over each property of the parentObject
+            Object.keys(parentObjects).forEach(property => {
+                const propertyValue = parentObjects[property];
+                if (Array.isArray(propertyValue)) {
+                    // If the property value is an array, iterate over each element
+                    propertyValue.forEach(element => {
+                        performOperations(element, operations);
                     });
                 }
             });
-        } else {
-            if (parentObjects && parentObjects.postalAddress) {
-                parentObjects.postalAddress.forEach(address => {
-                    performOperations(address, operations);
-                });
-            }
         }
     });
 }

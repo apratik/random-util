@@ -8,6 +8,8 @@ const currencyDecimals = {
     "BHD": 3
 };
 
+const _ = require('lodash');
+
 function removeEmpty(obj) {
     return _.transform(obj, (result, value, key) => {
         if (_.isObject(value)) {
@@ -20,6 +22,16 @@ function removeEmpty(obj) {
         }
     });
 }
+
+function deepClean(obj) {
+    const cleanedObj = removeEmpty(obj);
+    return _.isEmpty(cleanedObj) ? undefined : cleanedObj;
+}
+
+module.exports = {
+    deepClean,
+};
+
 
 
 function rename(obj, mapping) {

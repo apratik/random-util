@@ -123,6 +123,33 @@ function modifyAddress(payload, parentPaths, operations) {
 
 ------
 
+-----
+
+    function move(payload, mappings) {
+    mappings.forEach(mapping => {
+        const fromPath = Object.keys(mapping)[0];
+        const toPath = mapping[fromPath];
+        const fromJsonPath = fromPath.replace(/\[\*\]/g, '[*]');
+        const toJsonPath = toPath.replace(/\[\*\]/g, '[*]');
+
+        const values = jsonpath.query(payload, fromJsonPath);
+        values.forEach(value => {
+            const toPathWithValue = toJsonPath.replace(/\[\*\]/g, `[${value}]`);
+            const fromPathWithValue = fromJsonPath.replace(/\[\*\]/g, `[${value}]`);
+            const valueToMove = _.get(payload, fromPathWithValue);
+            if (valueToMove !== undefined) {
+                _.set(payload, toPathWithValue, valueToMove);
+                _.unset(payload, fromPathWithValue);
+            }
+        });
+    });
+    return payload;
+}
+
+-----
+
+    
+
     
 
 

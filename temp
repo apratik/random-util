@@ -68,9 +68,8 @@ function modifyAddress(payload, parentPaths, operations) {
                 }
             });
         } else {
-            const parentObject = _.get(payload, parentPath);
-            if (parentObject && parentObject.postalAddress) {
-                parentObject.postalAddress.forEach(address => {
+            if (parentObjects && parentObjects.postalAddress) {
+                parentObjects.postalAddress.forEach(address => {
                     performOperations(address, operations);
                 });
             }

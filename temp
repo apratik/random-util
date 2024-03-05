@@ -1,5 +1,3 @@
-// funcs.js
-
 const _ = require('lodash');
 
 // Global mapping of currency codes to the number of decimal places
@@ -60,13 +58,24 @@ function convertToMinor(obj, currencyType, paths) {
 
 function modifyAddress(payload, parentPaths, operations) {
     parentPaths.forEach(parentPath => {
-        const parentObjects = _.get(payload, parentPath);
-        if (Array.isArray(parentObjects)) {
-            parentObjects.forEach(parentObject => {
-                performOperations(parentObject, operations);
-            });
+        if (parentPath.includes('[]')) {
+            // Path contains array notation
+            const parentPathParts = parentPath.split('[]');
+            const parentArray = _.get(payload, parentPathParts[0]);
+            if (Array.isArray(parentArray)) {
+                parentArray.forEach(parentObject => {
+                    const addressObject = _.get(parentObject, parentPathParts[1]);
+                    if (addressObject) {
+                        performOperations(addressObject, operations);
+                    }
+                });
+            }
         } else {
-            performOperations(parentObjects, operations);
+            // Regular parent path
+            const parentObject = _.get(payload, parentPath);
+            if (parentObject) {
+                performOperations(parentObject, operations);
+            }
         }
     });
 }
@@ -82,7 +91,6 @@ function performOperations(obj, operations) {
         move(obj, operations.move);
     }
 }
-
 
 module.exports = {
     rename,

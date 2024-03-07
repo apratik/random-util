@@ -208,9 +208,7 @@ function removeEmptyFields(obj) {
 
 
 
-const jsonpath = require('jsonpath');
-
-function newmove(payload, mappings) {
+function move(payload, mappings) {
     mappings.forEach(mapping => {
         const fromPath = Object.keys(mapping)[0];
         const toPath = mapping[fromPath];
@@ -219,11 +217,11 @@ function newmove(payload, mappings) {
 
         if (!sourceValues || !sourceValues.length) return; // Skip if source values are empty or undefined
 
-        if (sourceValues.length === 1) {
-            // If there's only one object in sourceValues, assign it directly
+        if (sourceValues.length === 1 && !Array.isArray(sourceValues[0])) {
+            // If there's only one object in sourceValues and it's not an array, assign it directly
             jsonpath.value(payload, `$.${toPath}`, sourceValues[0]);
         } else {
-            // If there are multiple objects in sourceValues, assign it as an array
+            // If there are multiple objects or a single array object, assign it as an array
             jsonpath.value(payload, `$.${toPath}`, sourceValues);
         }
 
@@ -233,11 +231,6 @@ function newmove(payload, mappings) {
 
     return payload;
 }
-
-module.exports = {
-    move,
-};
-
 
 module.exports = {
     removeEmptyFields,

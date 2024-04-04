@@ -1,6 +1,4 @@
-Certainly! Here's the adjusted test case with the provided `config.toml`:
 
-```javascript
 import { resolveEndpoint } from '../config'; // Adjust the import path as needed
 
 describe('config.js - resolveEndpoint', () => {

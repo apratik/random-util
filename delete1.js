@@ -1,66 +1,65 @@
-import { resolveEndpoint } from '../config'; // Adjust the import path as needed
+import { discoverConfig } from '../config'; // Assuming the file containing discoverConfig is located at '../config'
 
-describe('config.js - resolveEndpoint', () => {
-  const mockConfig = {
-    payments: {
-      endpoint: 'https://helix-payments-us-e-1.590291577452.uat.aws.jpmchase.net/api/v2',
-      auth: {
-        url: 'https://idauatg2.jpmorganchase.com/adfs/oauth2/token',
-        grantType: 'password',
-        resource: '',
-        clientId: '1',
-        username: 'username',
-        password: 'password'
-      }
-    },
-    cps: {
-      endpoint: 's3://app-id-106752-dep-id-106753-uu-id-t8891reloco2'
-    },
-    bin: {
-      endpoint: 's3://app-id-106752-dep-id-106753-uu-id-t8891reloco2'
-    }
-  };
+describe('discoverConfig', () => {
+  let mockFsReadFileSync;
 
-  const mockAllowedProtocols = ['https:', 's3:'];
-
-  it('should resolve payments endpoint with valid protocol', () => {
-    const result = resolveEndpoint(mockConfig, 'payments', mockAllowedProtocols);
-
-    expect(result).toEqual({
-      endpoint: 'https://helix-payments-us-e-1.590291577452.uat.aws.jpmchase.net/api/v2',
-      url: 'https://helix-payments-us-e-1.590291577452.uat.aws.jpmchase.net/api/v2',
-      auth: {
-        url: 'https://idauatg2.jpmorganchase.com/adfs/oauth2/token',
-        grantType: 'password',
-        resource: '',
-        clientId: '1',
-        username: 'username',
-        password: 'password'
-      }
-    });
+  beforeEach(() => {
+    // Mock the fs.readFileSync function to return mock TOML content
+    mockFsReadFileSync = jest.spyOn(fs, 'readFileSync');
   });
 
-  it('should resolve CPS endpoint with valid protocol', () => {
-    const result = resolveEndpoint(mockConfig, 'cps', mockAllowedProtocols);
-
-    expect(result).toEqual({
-      type: 'aws',
-      bucket: 'app-id-106752-dep-id-106753-uu-id-t8891reloco2',
-      prefix: '',
-      endpoint: 's3://app-id-106752-dep-id-106753-uu-id-t8891reloco2'
-    });
+  afterEach(() => {
+    // Restore the original implementation of fs.readFileSync after each test
+    mockFsReadFileSync.mockRestore();
   });
 
-  it('should resolve BIN endpoint with valid protocol', () => {
-    const result = resolveEndpoint(mockConfig, 'bin', mockAllowedProtocols);
+  // Test case for successful configuration discovery
+  it('should successfully discover the configuration', () => {
+    // Mock the fs.existsSync function to return true
+    jest.spyOn(fs, 'existsSync').mockReturnValueOnce(true);
 
-    expect(result).toEqual({
-      type: 'aws',
-      bucket: 'app-id-106752-dep-id-106753-uu-id-t8891reloco2',
-      prefix: '',
-      endpoint: 's3://app-id-106752-dep-id-106753-uu-id-t8891reloco2'
-    });
+    // Mock the fs.readFileSync function to return mock TOML content
+    const mockConfig = `
+      [payments]
+      endpoint = "https://example.com/payments"
+      auth = { username = "user", password = "pass" }
+
+      [cps]
+      endpoint = "s3://example-bucket/cps"
+    `;
+    mockFsReadFileSync.mockReturnValueOnce(mockConfig);
+
+    // Call the function under test
+    const config = discoverConfig();
+
+    // Assert the expected configuration properties
+    expect(config).toBeDefined();
+    expect(config.payments.endpoint).toEqual('https://example.com/payments');
+    expect(config.payments.auth.username).toEqual('user');
+    expect(config.payments.auth.password).toEqual('pass');
+    expect(config.cps.endpoint).toEqual('s3://example-bucket/cps');
+    // Add more assertions for other configuration properties
   });
 
-  // Add more test cases for other scenarios of resolveEndpoint function as needed
+  // Test case for configuration file not found
+  it('should throw an error if the configuration file is not found', () => {
+    // Mock the fs.existsSync function to return false
+    jest.spyOn(fs, 'existsSync').mockReturnValueOnce(false);
+
+    // Call the function under test and expect it to throw an error
+    expect(discoverConfig).toThrow('datalink config is not found');
+  });
+
+  // Test case for invalid configuration file content
+  it('should throw an error if the configuration file content is invalid', () => {
+    // Mock the fs.existsSync function to return true
+    jest.spyOn(fs, 'existsSync').mockReturnValueOnce(true);
+
+    // Mock the fs.readFileSync function to return invalid TOML content
+    const invalidConfig = 'invalid TOML content';
+    mockFsReadFileSync.mockReturnValueOnce(invalidConfig);
+
+    // Call the function under test and expect it to throw an error
+    expect(discoverConfig).toThrow('Unexpected token');
+  });
 });

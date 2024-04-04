@@ -1,123 +1,30 @@
-import { discoverConfig, resolveEndpoint } from '../config'; // Adjust the import path as needed
+Certainly! Here's the adjusted test case with the provided `config.toml`:
 
-describe('config.js', () => {
-  describe('discoverConfig', () => {
-    it('should load config from existing file', () => {
-      // Mock the existence of a config file
-      jest.spyOn(require('fs'), 'existsSync').mockReturnValueOnce(true);
-      
-      // Mock the content of the config file
-      jest.spyOn(require('fs'), 'readFileSync').mockReturnValueOnce(`
-        [payments]
-        endpoint = "https://example.com"
-        auth = {}
+```javascript
+import { resolveEndpoint } from '../config'; // Adjust the import path as needed
 
-        [cps]
-        endpoint = "http://cps.example.com"
-        auth = {}
-      `);
-      
-      const config = discoverConfig();
-      
-      expect(config).toEqual({
-        payments: {
-          endpoint: 'https://example.com',
-          auth: {}
-        },
-        cps: {
-          endpoint: 'http://cps.example.com',
-          auth: {}
-        },
-        endpoint: null,
-        auth: {},
-        certfile: null,
-        keyfile: null,
-        httpsEnabled: false,
-        port: 3000
-      });
-    });
-    
-    // Add more test cases for different scenarios of discoverConfig if needed
-  });
+describe('config.js - resolveEndpoint', () => {
+  it('should resolve endpoint with valid protocol', () => {
+    const mockConfig = {
+      payments: {
+        endpoint: 'https://helix-payments-us-e-1.590291577452.uat.aws.jpmchase.net/api/v2',
+        auth: {
+          url: 'https://idauatg2.jpmorganchase.com/adfs/oauth2/token',
+          grantType: 'password',
+          resource: '',
+          clientId: '1',
+          username: 'username',
+          password: 'password',
+        }
+      },
+      cps: {
+        endpoint: 's3://app-id-106752-dep-id-106753-uu-id-t8891reloco2',
+      },
+      bin: {
+        endpoint: 's3://app-id-106752-dep-id-106753-uu-id-t8891reloco2',
+      }
+    };
+    const mockPath = 'payments';
+    const mockAllowedProtocols = ['https:', 's3:'];
 
-  describe('resolveEndpoint', () => {
-    it('should resolve endpoint with valid protocol', () => {
-      const mockConfig = {
-        endpoint: 'https://example.com',
-      };
-      const mockPath = 'payments';
-      const mockAllowedProtocols = ['https:'];
-
-      const result = resolveEndpoint(mockConfig, mockPath, mockAllowedProtocols);
-
-      expect(result).toEqual({
-        endpoint: 'https://example.com',
-        url: 'https://example.com',
-        auth: {},
-      });
-    });
-
-    it('should throw error for invalid protocol', () => {
-      const mockConfig = {
-        endpoint: 'ftp://example.com',
-      };
-      const mockPath = 'payments';
-      const mockAllowedProtocols = ['https:'];
-
-      expect(() => {
-        resolveEndpoint(mockConfig, mockPath, mockAllowedProtocols);
-      }).toThrowError('Invalid protocol for endpoint "payments". Valid options: https:');
-    });
-
-    it('should resolve local endpoint', () => {
-      const mockConfig = {
-        endpoint: 'file://path/to/local/file',
-      };
-      const mockPath = 'payments';
-      const mockAllowedProtocols = ['https:', 'file:'];
-
-      const result = resolveEndpoint(mockConfig, mockPath, mockAllowedProtocols);
-
-      expect(result).toEqual({
-        type: 'local',
-        prefix: 'path/to/local/file',
-        endpoint: 'file://path/to/local/file',
-      });
-    });
-
-    it('should resolve AWS S3 endpoint', () => {
-      const mockConfig = {
-        endpoint: 's3://example-bucket/path/to/file',
-      };
-      const mockPath = 'payments';
-      const mockAllowedProtocols = ['https:', 'file:', 's3:'];
-
-      const result = resolveEndpoint(mockConfig, mockPath, mockAllowedProtocols);
-
-      expect(result).toEqual({
-        type: 'aws',
-        bucket: 'example-bucket',
-        prefix: 'path/to/file',
-        endpoint: 's3://example-bucket/path/to/file',
-      });
-    });
-
-    it('should resolve endpoint with empty protocol', () => {
-      const mockConfig = {
-        endpoint: '',
-      };
-      const mockPath = 'payments';
-      const mockAllowedProtocols = ['https:', 'file:', 's3:'];
-
-      const result = resolveEndpoint(mockConfig, mockPath, mockAllowedProtocols);
-
-      expect(result).toEqual({
-        type: 'none',
-        prefix: '',
-        endpoint: '',
-      });
-    });
-
-    // Add more test cases for resolveEndpoint function as needed
-  });
-});
+    const result = resolveEndpoint(mockConfig, mockPath, mock
